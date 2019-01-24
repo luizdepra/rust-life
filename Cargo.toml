@@ -1,0 +1,12 @@
+[package]
+name = "rust-life"
+version = "0.1.0"
+authors = ["Luiz F. A. de Prá <luizfdepra@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+structopt = "0.2"
+termion = "1.5"
+rand = "0.5"
+
+[dev-dependencies]
