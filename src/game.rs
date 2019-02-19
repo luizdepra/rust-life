@@ -1,17 +1,10 @@
-use std::{io, thread, time};
+use std::{io, mem, thread, time};
 
 use crate::configuration::Config;
 use crate::generation::Generation;
-use crate::terminal::RawTerminal;
+use crate::terminal::{Color, RawTerminal};
 
-/*
-╔════════════════════╗
-║───┬───Paused───────║
-║ p | pause/unpause  ║
-║ s | save           ║
-║ q | quit           ║
-╚═══╧════════════════╝
-*/
+const BLOCK_CHAR: char = '▀';
 
 /// Represents the game state.
 #[allow(dead_code)]
@@ -54,6 +47,8 @@ impl Game {
 
     /// Run the game.
     pub fn run(&mut self) -> io::Result<()> {
+        self.init_random();
+
         self.terminal.clear()?;
         self.terminal.flush()?;
 
@@ -71,6 +66,8 @@ impl Game {
             self.terminal.flush()?;
 
             thread::sleep(self.speed);
+
+            self.next_generation();
         }
 
         self.terminal.clear()?;
@@ -80,18 +77,44 @@ impl Game {
     }
 
     pub fn draw_generation(&mut self) -> io::Result<()> {
-        for y in 0..self.current.height {
+        for y in (0..self.current.height).step_by(2) {
             for x in 0..self.current.width {
-                let cell = self.current.cell(x, y);
+                let top_cell = self.current.cell(x, y);
+                let bottom_cell = self.current.cell(x, y + 1);
 
-                if cell.is_alive() {
-                    self.terminal.draw_at('0', x, y)?;
-                } else {
-                    self.terminal.draw_at(' ', x, y)?;
-                }
+                let (fg, bg) = match (top_cell.is_alive(), bottom_cell.is_alive()) {
+                    (true, true) => (Color::White, Color::White),
+                    (true, false) => (Color::White, Color::Black),
+                    (false, true) => (Color::Black, Color::White),
+                    (false, false) => (Color::Black, Color::Black),
+                };
+
+                self.terminal.set_foreground(fg)?;
+                self.terminal.set_background(bg)?;
+                self.terminal.draw_at(BLOCK_CHAR, x, y / 2)?;
+                self.terminal.reset_styling()?;
             }
         }
 
         Ok(())
+    }
+
+    fn next_generation(&mut self) {
+        self.next.update(&self.current);
+
+        mem::swap(&mut self.current, &mut self.next);
+    }
+
+    fn init_random(&mut self) {
+        for y in 0..self.current.height {
+            for x in 0..self.current.width {
+                let cell = self.current.mut_cell(x, y);
+                if rand::random() {
+                    cell.spawn();
+                } else {
+                    cell.kill();
+                }
+            }
+        }
     }
 }

@@ -1,3 +1,5 @@
+use itertools::iproduct;
+
 use crate::cell::Cell;
 
 /// Represents a cell generation.
@@ -25,9 +27,28 @@ impl Generation {
         }
     }
 
+    pub fn update(&mut self, current: &Self) {
+        // TODO verify generation sizes
+
+        iproduct!(0..self.height, 0..self.width)
+            .for_each(|(y, x)| {
+                let target_cell = self.mut_cell(x, y);
+                if current.cell(x, y).is_alive() {
+                    target_cell.kill();
+                } else {
+                    target_cell.spawn();
+                }
+            });
+    }
+
     pub fn cell(&self, x: u16, y: u16) -> &Cell {
         let position = (y * self.width + x) as usize;
         &self.cells[position]
+    }
+
+    pub fn mut_cell(&mut self, x: u16, y: u16) -> &mut Cell {
+        let position = (y * self.width + x) as usize;
+        &mut self.cells[position]
     }
 }
 

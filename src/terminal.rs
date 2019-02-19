@@ -1,6 +1,11 @@
 use std::io::{self, Read, Write};
 
-use termion::{self, cursor, raw};
+use termion::{self, color, cursor, raw, style};
+
+pub enum Color {
+    White,
+    Black,
+}
 
 /// A terminal abstraction with input, output and events handling.
 #[derive(Debug)]
@@ -57,10 +62,27 @@ where
         self.stdout.flush()
     }
 
+    pub fn set_foreground(&mut self, color: Color) -> io::Result<()> {
+        match color {
+            Color::White => write!(self.stdout, "{}", color::Fg(color::White)),
+            Color::Black => write!(self.stdout, "{}", color::Fg(color::Black)),
+        }
+    }
+
+    pub fn set_background(&mut self, color: Color) -> io::Result<()> {
+        match color {
+            Color::White => write!(self.stdout, "{}", color::Bg(color::White)),
+            Color::Black => write!(self.stdout, "{}", color::Bg(color::Black)),
+        }
+    }
+
+    pub fn reset_styling(&mut self) -> io::Result<()> {
+        write!(self.stdout, "{}", style::Reset)
+    }
+
     pub fn draw_at(&mut self, symbol: char, x: u16, y: u16) -> io::Result<()> {
         // Goto is one-based, so we need to add 1 to each coord.
         let position = cursor::Goto(x + 1, y + 1);
-
         write!(self.stdout, "{}{}", position, symbol)
     }
 }

@@ -17,6 +17,14 @@ impl Cell {
     pub fn is_alive(&self) -> bool {
         self.state == State::Alive
     }
+
+    pub fn spawn(&mut self) {
+        self.state = State::Alive;
+    }
+
+    pub fn kill(&mut self) {
+        self.state = State::Dead;
+    }
 }
 
 impl Default for Cell {
