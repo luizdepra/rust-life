@@ -8,6 +8,7 @@ mod cell;
 mod configuration;
 mod game;
 mod generation;
+mod ruleset;
 mod terminal;
 
 use crate::configuration::Config;

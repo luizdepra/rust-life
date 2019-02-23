@@ -1,7 +1,10 @@
 use std::{io, mem, thread, time};
 
+use itertools::iproduct;
+
 use crate::configuration::Config;
 use crate::generation::Generation;
+use crate::ruleset::Ruleset;
 use crate::terminal::{Color, RawTerminal};
 
 const BLOCK_CHAR: char = '▀';
@@ -100,7 +103,15 @@ impl Game {
     }
 
     fn next_generation(&mut self) {
-        self.next.update(&self.current);
+        // TODO verify generation sizes
+        iproduct!(0..self.current.height, 0..self.current.width).for_each(|(y, x)| {
+            let target_cell = self.next.mut_cell(x, y);
+            if Ruleset::should_live(x, y, &self.current) {
+                target_cell.spawn();
+            } else {
+                target_cell.kill();
+            }
+        });
 
         mem::swap(&mut self.current, &mut self.next);
     }
