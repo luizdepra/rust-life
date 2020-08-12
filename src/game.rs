@@ -1,10 +1,11 @@
 use std::{io, mem, thread, time};
 
 use itertools::iproduct;
+use liblife::cell::{Cell, SimpleCell};
+use liblife::generation::{Generation, SimpleGeneration};
+use liblife::result::{Error, Result};
 
 use crate::configuration::Config;
-use crate::generation::Generation;
-use crate::ruleset::Ruleset;
 use crate::terminal::{Color, RawTerminal};
 
 const BLOCK_CHAR: char = '▀';
@@ -19,7 +20,10 @@ enum State {
 
 /// Holds the game data and controls its behavior.
 #[allow(dead_code)]
-pub struct Game {
+pub struct Game<T>
+where
+    T: Cell,
+{
     /// The terminal.
     terminal: RawTerminal,
 
@@ -30,22 +34,25 @@ pub struct Game {
     speed: time::Duration,
 
     /// Current generation.
-    current: Generation,
+    current: Generation<T>,
 
     /// Next generation.
-    next: Generation,
+    next: Generation<T>,
 }
 
-impl Game {
+impl<T> Game<T>
+where
+    T: Cell
+{
     /// Create a new Game.
-    pub fn new(config: Config, terminal: RawTerminal) -> Self {
-        Game {
+    pub fn new(config: Config, terminal: RawTerminal) -> Result<Self> {
+        Ok(Game {
             terminal,
             state: State::Paused,
             speed: time::Duration::from_millis(u64::from(config.speed)),
-            current: Generation::new(config.width, config.height),
-            next: Generation::new(config.width, config.height),
-        }
+            current: Generation::new(config.width, config.height)?,
+            next: Generation::new(config.width, config.height)?,
+        })
     }
 
     /// Run the game.

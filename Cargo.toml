@@ -6,8 +6,9 @@ edition = "2018"
 
 [dependencies]
 itertools = "0.8.0"
-structopt = "0.2.14"
-termion = "1.5.1"
+structopt = "0.2.16"
+termion = "1.5.2"
 rand = "0.6.5"
+liblife = "0.2.0"
 
 [dev-dependencies]

@@ -8,11 +8,11 @@ use structopt::StructOpt;
 pub struct Config {
     /// World width.
     #[structopt(short = "w", long = "width", default_value = "80")]
-    pub width: u16,
+    pub width: u64,
 
     /// World height.
     #[structopt(short = "h", long = "height", default_value = "48")]
-    pub height: u16,
+    pub height: u64,
 
     /// Set generation speed (ms).
     #[structopt(short = "s", long = "speed", default_value = "1000")]
